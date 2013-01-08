@@ -2,6 +2,7 @@ GEM
   remote: http://rubygems.org/
   specs:
     ansi (1.4.3)
+    haml (3.1.7)
     minitest (3.2.0)
     pg (0.14.0)
     rack (1.4.1)
@@ -20,6 +21,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  haml
   minitest
   pg
   rake

@@ -1,0 +1,16 @@
+!!! 5
+%html{html_attrs('en-en')}
+  %head
+    %meta{:'http-equiv' => "Content-Type", :content => "text/html; charset=utf-8"}
+    %meta{:name => "lang", :content => "en"}
+    %title '(find clojure code) - GetClojure
+    %link{:href => "assets/css/style.css", :rel => "stylesheet", :type => "text/css"}/
+  %body
+    %header
+      %h1 GetClojure
+      %p '(find clojure code)
+    .container
+      %form{method:"get", action:"/search"}
+        %input{type:"text", name:"q", placeholder:"search clojure expression", value:@q}
+        %input{type:"submit", value:"search"}
+      = yield
