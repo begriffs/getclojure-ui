@@ -1,3 +1,4 @@
-%ul
-  - @results.each do |expr|
-    %li expr.input
+%section.results
+  %ul
+    - @results.each do |expr|
+      %li= expr['input']

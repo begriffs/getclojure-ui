@@ -9,8 +9,14 @@
     %header
       %h1 GetClojure
       %p '(find clojure code)
-    .container
+    %section.search
       %form{method:"get", action:"/search"}
         %input{type:"text", name:"q", placeholder:"search clojure expression", value:@q}
         %input{type:"submit", value:"search"}
-      = yield
+    = yield
+    %footer
+      %p
+        Created by
+        %a{href:"http://devinwalters.com"}Devin Walters
+        and
+        %a{href:"http://begriffs.com"}Joe Nelson
