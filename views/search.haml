@@ -1,4 +1,14 @@
 %section.results
   %ul
-    - @results.each do |expr|
-      %li= expr['input']
+    - @results.each_with_index do |expr, i|
+      %li.tabbed
+        %ul
+          %li
+            %a{href:"#tab_#{i}_1"}Input
+          %li
+            %a{href:"#tab_#{i}_2"}Value
+          %li
+            %a{href:"#tab_#{i}_3"}Output
+        %pre{id:"tab_#{i}_1"}= expr['input']
+        %pre{id:"tab_#{i}_2"}= expr['value']
+        %pre{id:"tab_#{i}_3"}= expr['output']
