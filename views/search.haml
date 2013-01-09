@@ -1,14 +1,8 @@
 %section.results
   %ul
     - @results.each_with_index do |expr, i|
-      %li.tabbed
-        %ul
-          %li
-            %a{href:"#tab_#{i}_1"}Input
-          %li
-            %a{href:"#tab_#{i}_2"}Value
-          %li
-            %a{href:"#tab_#{i}_3"}Output
-        %pre{id:"tab_#{i}_1"}= expr['input']
-        %pre{id:"tab_#{i}_2"}= expr['value']
-        %pre{id:"tab_#{i}_3"}= expr['output']
+      %li.result
+        %pre.input= Rack::Utils.escape_html(expr['input'])
+        %pre.value= Rack::Utils.escape_html(expr['value'])
+        - if expr['output'] != '""'
+          %pre.output= Rack::Utils.escape_html(expr['output'].gsub(/^"|"$/, "")).gsub(/\\n/, "<br />")
