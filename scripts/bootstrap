@@ -1,0 +1,143 @@
+#!/bin/sh
+
+# installs needed dependencies for this project
+
+# this is much easier if we're in the project directory
+# NOTE: this script needs a directory called 'db' in the PWD to run correctly
+if [ "$(basename $PWD)" = "scripts" -o ! -d db ]; then
+	echo Please run this script in the project\'s root directory
+	echo For example \'sh scripts/bootstrap\' from the correct directory
+	echo
+	exit
+fi
+
+# ruby
+#
+if [ -x "$(command -v ruby)" ]; then
+	echo ruby exists, not reinstalling
+else
+	echo
+	echo missing ruby, installing with rvm...
+	curl -#L https://get.rvm.io | bash -s stable --ruby &> /dev/null
+
+	if [ $? != 0 ]; then
+		echo Error installing ruby from rvm
+		echo Please run \"curl -#L https://get.rvm.io \| bash -s stable --ruby\"
+		echo for more info
+	else
+		echo ruby installed succesfully
+	fi
+	echo
+fi
+
+#
+# postgresql
+#
+if [ -x "$(command -v pg_ctl)" ]; then
+	echo pg_ctl exists\; not reinstalling
+else
+	echo
+	echo "missing postgresql; installing with brew..."
+	brew install postgresql &> /dev/null
+
+	if [ $? != 0 ]; then
+		echo Error installing postgresql
+		echo Please run \"brew install postgresql\"
+		echo for more info
+	else
+		echo postgresql installed succesfully
+	fi
+	echo
+fi
+
+if [ $(ps ax | grep postgres | wc -l) -gt 1 ]; then
+	echo postgresql appears to be running, not restarting it
+else
+	echo
+	echo postgresql doesn\'t seem to be running, starting...
+	pg_ctl start -D /usr/local/var/postgres &> /dev/null
+
+	if [ $? != 0 ]; then
+		echo Error starting postgresql
+		echo Please run \"pg_ctl start /usr/local/var/postgres\"
+		echo for more info
+	else
+		echo postgresql started succesfully
+	fi
+	echo
+fi
+
+read -p "Which database should we use for this project? " db_to_use
+
+if [ $(psql --list | cut -d\| -f1 | grep -w $db_to_use | wc -l) -gt 0 ]; then
+	echo "Database \"$db_to_use\" exists, not recreating"
+else
+	echo "Database \"$db_to_use\" does not exist, making it with dbcreate"
+	dbcreate $db_to_use &> /dev/null
+
+	if [ $? != 0 ]; then
+		echo Error creating database \"$db_to_use\"
+		echo Please run \"dbcreate $db_to_use\"
+		echo for more info
+	else
+		echo "Database \"$db_to_use\" created successfully"
+	fi
+	echo
+fi
+
+if [ ! -e db/config.rb ]; then
+	cp db/config.rb.example db/config.rb
+	sed -e "s/'dbname' => ''$/'dbname' => '$db_to_use'/" -i'' -f db/config.rb
+else
+	echo
+	echo db/config.rb exists, please make sure it\'s configured to use the right database
+	echo
+fi
+
+echo Creating/Populating the database
+rake db:create &> /dev/null
+if [ $? != 0 ]; then
+	echo Error creating the database \'$db_to_use\'
+	echo Please run \"rake db:create\"
+	echo for more info
+else
+	echo "Database \"$db_to_use\" created successfully"
+fi
+echo
+rake db:migrate &> /dev/null
+if [ $? != 0 ]; then
+	echo Error populating the database \'$db_to_use\'
+	echo Please run \"rake db:migrate\"
+	echo for more info
+else
+	echo "Database \"$db_to_use\" populated successfully"
+fi
+echo
+
+#
+# bundle
+#
+if [ -x "$(command -v bundle)" ]; then
+	echo "bundle exists; not reinstalling"
+else
+	echo
+	echo "missing bundler; installing with gem..."
+	gem install bundler &> /dev/null
+
+	if [ $? != 0 ]; then
+		echo Error installing bundle
+		echo Please run "gem install bundler"
+		echo for more info
+	else
+		echo bundle installed succesfully
+	fi
+	echo
+fi
+
+echo running bundle so all necessary gems are installed
+bundle
+
+echo
+echo Bootstrapping finished.
+echo You should be able to run \'rackup\' now to start the server
+echo
